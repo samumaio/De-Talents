@@ -12,7 +12,6 @@ contract UserNFT is ERC721 {
     uint256 public tokenCounter;
     uint256 public baseFee;
     address payable private owner;
-    mapping(address => bool) private institutions;
     mapping(uint256 => string) private tokenURIs;
     //modifiers
     /// @notice Only verified istiutitons enabled
@@ -25,7 +24,7 @@ contract UserNFT is ERC721 {
         _;
     }
     //events
-    event mintedUserNFT(address recipient);
+    event mintedUserNFT(address indexed recipient, uint256 indexed tokenId);
     //errors
     error notEnoughETHProvided();
     error withdrawFailed();
@@ -37,25 +36,19 @@ contract UserNFT is ERC721 {
         owner = payable(msg.sender);
     }
 
-    function mintNFT(
-        address recipient,
-        string memory tokenURI
-    ) public payable returns (uint256) {
+    function mintNFT(address recipient, string memory tokenURI) public payable {
         require(msg.value >= baseFee, notEnoughETHProvided());
         _mint(recipient, tokenCounter);
         //Sets the tokenURI for the newly minted NFT
         tokenURIs[tokenCounter] = tokenURI;
+        //Writes the recipient and the token Id for the new NFT on the logs
+        emit mintedUserNFT(recipient, tokenCounter);
         tokenCounter++;
-        return tokenCounter - 1;
     }
 
     function withdraw() public onlyOwner {
         (bool success, ) = owner.call{value: address(this).balance}("");
         require(success, withdrawFailed());
-    }
-
-    function isCertified(address institution) public view returns (bool) {
-        return institutions[institution];
     }
 
     function getBaseFee() public view returns (uint256) {
