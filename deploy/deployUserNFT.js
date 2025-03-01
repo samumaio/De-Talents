@@ -14,9 +14,7 @@ async function main() {
     console.log("Contract is ready to be deployed.");
     const contract = await contractFactory.deploy(); // inizializzazione del contratto
     console.log("Contract is deployed.");
-    const deploymentReceipt = await contract.deployTransaction.wait(1);
-    
-    const num = await contract.getNum();
+    const deploymentReceipt = await contract.deployTransaction.wait(1); //aspetta che sia confermato da un blocco
     
     console.log(num.toString());
 }
