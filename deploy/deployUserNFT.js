@@ -7,8 +7,8 @@ async function main() {
     const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_URL);
     
     const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider); // collegamento al wallet
-    const abi = fs.readFileSync("./artifacts/contracts/SimpleStorage.sol/SimpleStorage.json", "utf8"); // lettura file abi del contract
-    const bin = fs.readFileSync("./artifacts/contracts/SimpleStorage.sol/SimpleStorage.bin", "utf8"); // lettura file bin del contract
+    const abi = fs.readFileSync("./artifacts/contracts/UserNFT.sol/UserNFT.json", "utf8"); // lettura file abi del contract
+    const bin = fs.readFileSync("./artifacts/contracts/UserNFT.sol/UserNFT.bin", "utf8"); // lettura file bin del contract
 
     const contractFactory = new ethers.ContractFactory(abi, bin, wallet); // creazione del creatore del contratto
     console.log("Contract is ready to be deployed.");
