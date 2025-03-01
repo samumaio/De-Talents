@@ -2,7 +2,7 @@ const { ethers } = require('ethers');
 const fs = require("fs");
 require("dotenv").config();
 
-async function main() {
+async function deployUserNFT() {
 
     const provider = new ethers.providers.JsonRpcProvider(process.env.SEPOLIA_URL);
     
