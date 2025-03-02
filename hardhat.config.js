@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy")
+require("ethers")
 require("solidity-coverage")
 require("hardhat-gas-reporter")
 require("@nomicfoundation/hardhat-chai-matchers");

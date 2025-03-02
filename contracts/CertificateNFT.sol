@@ -67,4 +67,8 @@ contract CerticateNFT is ERC721 {
     function isCertified(address institution) public view returns (bool) {
         return institutions[institution];
     }
+
+    function getCounter() public view returns (uint256) {
+        return tokenCounter;
+    }
 }

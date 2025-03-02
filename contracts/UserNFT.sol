@@ -54,4 +54,12 @@ contract UserNFT is ERC721 {
     function getBaseFee() public view returns (uint256) {
         return baseFee;
     }
+
+    function getCounter() public view returns (uint256) {
+        return tokenCounter;
+    }
+
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        return tokenURIs[tokenId];
+    }
 }
