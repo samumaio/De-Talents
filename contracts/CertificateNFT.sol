@@ -8,15 +8,18 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /// @author samumaio
 /// @notice This smart contract mints a Certificate NFT on behalf of a certain user from the platform. Furthermore this contract should be a Soul bound token so as to not be transfered.
 
-contract CerticateNFT is ERC721 {
+contract CertificateNFT is ERC721 {
     uint256 public tokenCounter;
     address payable private owner;
-    mapping(address => bool) private institutions;
+    mapping(address => institutionStatus) private institutions;
     mapping(uint256 => string) private tokenURIs;
     //modifiers
     /// @notice Only verified istiutitons enabled
     modifier onlyIstitutions() {
-        require(institutions[msg.sender], notAnInstitution());
+        require(
+            institutions[msg.sender] != institutionStatus.NOTANINSTITUTION,
+            notAnInstitution()
+        );
         _;
     }
     modifier onlyOwner() {
@@ -29,10 +32,17 @@ contract CerticateNFT is ERC721 {
         uint256 indexed tokenId
     );
     event verifiedInstitution(address institution);
-
+    //enum
+    enum institutionStatus {
+        NOTANINSTITUTION, // default value
+        UNVERIFIED,
+        VERIFIED
+    }
     //errors
     error unverifiedInstitution(address institution);
+    error enteredInstitutionDoesNotExist();
     error verifiedInstitutionAlreadyExist(address institution);
+    //The searched address is not found on institutions mapping
     error notAnInstitution();
     error ownerOnly();
 
@@ -53,19 +63,33 @@ contract CerticateNFT is ERC721 {
     }
 
     function verifyInstitution(address institution) public onlyOwner {
-        institutions[institution] = true;
+        require(
+            institutions[institution] != institutionStatus.NOTANINSTITUTION,
+            notAnInstitution()
+        );
+        institutions[institution] = institutionStatus.VERIFIED;
     }
 
     function addNewInstitution(address institution) public {
         require(
-            !institutions[institution],
+            !(institutions[institution] == institutionStatus.VERIFIED),
             verifiedInstitutionAlreadyExist(institution)
         );
-        institutions[institution] = false;
+        institutions[institution] = institutionStatus.UNVERIFIED;
     }
 
-    function isCertified(address institution) public view returns (bool) {
-        return institutions[institution];
+    function getInstitutionStatus(
+        address institution
+    ) public view returns (institutionStatus) {
+        require(
+            institutions[institution] != institutionStatus.NOTANINSTITUTION,
+            notAnInstitution()
+        );
+        return (institutions[institution]);
+    }
+
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        return tokenURIs[tokenId];
     }
 
     function getCounter() public view returns (uint256) {
