@@ -56,4 +56,11 @@ describe("Certificate NFTs Unit Tests", async function () {
         const uri = await certificateNFT.getTokenURI(tokenID)
         assert.equal(uri, setTokenURI)
     })
+    it("Does not allow to transfer NFTs ", async function () {
+        const { certificateNFT, deployer } = await loadFixture(deployCertificateNFT)
+        const signers = await ethers.getSigners();
+        const notOwner = signers[1];
+        await expect(certificateNFT.transferFrom(deployer, notOwner.getAddress(), 0, new Uint8Array())).to.be.reverted
+        await expect(certificateNFT.safeTransferFrom(deployer, notOwner.getAddress(), 0)).to.be.reverted;
+    })
 })

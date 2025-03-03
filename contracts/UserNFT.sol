@@ -29,6 +29,7 @@ contract UserNFT is ERC721 {
     error notEnoughETHProvided();
     error withdrawFailed();
     error notAllowed();
+    error soulBoundToken();
 
     constructor(uint256 fee) ERC721("USERNFT", "UFT") {
         tokenCounter = 0;
@@ -44,6 +45,33 @@ contract UserNFT is ERC721 {
         //Writes the recipient and the token Id for the new NFT on the logs
         emit mintedUserNFT(recipient, tokenCounter);
         tokenCounter++;
+    }
+
+    //Soul Bound Token - it is not possible to transfer the token from one wallet to the other
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public virtual override {
+        require(false, soulBoundToken());
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(false, soulBoundToken());
+    }
+
+    function _safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) internal virtual override {
+        require(false, soulBoundToken());
     }
 
     function withdraw() public onlyOwner {

@@ -57,4 +57,11 @@ describe("User NFTs Unit Tests", async function () {
         let ownerFinalBalance = await ethers.provider.getBalance(deployer)
         assert.isAbove(ownerFinalBalance - ownerInitialBalance, 0)
     })
+    it("Does not allow to transfer NFTs ", async function () {
+        const { userNFT, deployer } = await loadFixture(deployUserNFT)
+        const signers = await ethers.getSigners();
+        const notOwner = signers[1];
+        await expect(userNFT.transferFrom(deployer, notOwner.getAddress(), 0, new Uint8Array())).to.be.reverted
+        await expect(userNFT.safeTransferFrom(deployer, notOwner.getAddress(), 0)).to.be.reverted;
+    })
 })

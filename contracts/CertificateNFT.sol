@@ -44,6 +44,7 @@ contract CertificateNFT is ERC721 {
     error verifiedInstitutionAlreadyExist(address institution);
     //The searched address is not found on institutions mapping
     error notAnInstitution();
+    error soulBoundToken();
     error ownerOnly();
 
     constructor() ERC721("CERTICATENFT", "CRT") {
@@ -60,6 +61,33 @@ contract CertificateNFT is ERC721 {
         tokenURIs[tokenCounter] = tokenURI;
         emit mintedCertificateNFT(recipient, tokenCounter);
         tokenCounter++;
+    }
+
+    //Soul Bound Token - it is not possible to transfer the token from one wallet to the other
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public virtual override {
+        require(false, soulBoundToken());
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(false, soulBoundToken());
+    }
+
+    function _safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) internal virtual override {
+        require(false, soulBoundToken());
     }
 
     function verifyInstitution(address institution) public onlyOwner {
