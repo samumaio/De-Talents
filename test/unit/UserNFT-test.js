@@ -1,8 +1,8 @@
 const { network, getNamedAccounts, deployments, ethers } = require("hardhat")
 const { assert, expect, use } = require("chai")
+const { baseFee } = require("../../helper-hardhat-config")
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers")
 
-const baseFee = 40000 //40000 Wei
 describe("User NFTs Unit Tests", async function () {
     async function deployUserNFT() {
         const { deployer } = await getNamedAccounts();
