@@ -41,7 +41,7 @@ contract CertificateNFT is ERC721 {
     //errors
     error unverifiedInstitution(address institution);
     error enteredInstitutionDoesNotExist();
-    error verifiedInstitutionAlreadyExist(address institution);
+    error InstitutionAlreadyExist(address institution);
     //The searched address is not found on institutions mapping
     error notAnInstitution();
     error soulBoundToken();
@@ -100,8 +100,8 @@ contract CertificateNFT is ERC721 {
 
     function addNewInstitution(address institution) public {
         require(
-            !(institutions[institution] == institutionStatus.VERIFIED),
-            verifiedInstitutionAlreadyExist(institution)
+            (institutions[institution] != institutionStatus.NOTANINSTITUTION),
+            InstitutionAlreadyExist(institution)
         );
         institutions[institution] = institutionStatus.UNVERIFIED;
     }
