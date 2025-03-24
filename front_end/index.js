@@ -95,5 +95,6 @@ async function verificaStatoIstituzione() {
   }
 }
 
+
 window.connect = connect;
 window.verificaStatoIstituzione = verificaStatoIstituzione;
