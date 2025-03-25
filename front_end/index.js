@@ -9,8 +9,8 @@ async function connect() {
         document.getElementById("connectButton").innerHTML = "Connected";
         const accounts = await ethereum.request({ method: "eth_accounts" });
         console.log(accounts);
-        verificaOwner();
-        verificaStatoIstituzione();
+        await verificaOwner();
+        await verificaStatoIstituzione();
       } catch (error) {
         console.log(error);
       }

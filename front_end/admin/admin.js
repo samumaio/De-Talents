@@ -1,4 +1,4 @@
-const CONTRACT_ADDRESS = "0x44D02689910920d71354215931ecEC1A04C2156d"; // Inserisci l'indirizzo del contratto
+const CONTRACT_ADDRESS = "0x44D02689910920d71354215931ecEC1A04C2156d"; 
 import { CONTRACT_ABI } from '../abiCertificateNFT.js'
 
 async function ottieniListaIstituzioni() {
@@ -62,38 +62,6 @@ async function ottieniListaIstituzioni() {
       document.getElementById("output").innerText = "Errore durante l'interazione con il contratto.";
     }
   }
-  
-  /*async function verificaIstituzioneSelezionata() {
-    if (!window.ethereum) {
-      alert("Please connect to MetaMask first!");
-      return;
-    }
-  
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-  
-      const dropdown = document.getElementById("istituzioniDropdown");
-      const indirizzoSelezionato = dropdown.value;
-  
-      if (!indirizzoSelezionato) {
-        alert("Seleziona un'istituzione dal menu a tendina.");
-        return;
-      }
-  
-      // Verifica l'istituzione selezionata
-      const tx = await contract.verifyInstitution(indirizzoSelezionato);
-      await tx.wait(); // Aspetta che la transazione venga confermata
-      alert("Istituzione verificata con successo!");
-  
-      // Aggiorna il menu a tendina
-      caricaIstituzioniNonVerificate();
-    } catch (error) {
-      console.error("Errore durante la verifica dell'istituzione:", error);
-      alert("Errore durante la verifica dell'istituzione.");
-    }
-  }*/
   
   async function stampaIstituzioneNonVerificata(){
     if (!window.ethereum) {
@@ -164,6 +132,9 @@ async function ottieniListaIstituzioni() {
       const tx = await contract.verifyInstitution(indirizzoSelezionato);
       await tx.wait(); 
       alert("Istituzione verificata con successo!");
+
+      location.reload();
+
   
       ottieniListaIstituzioni();
       stampaIstituzioneNonVerificata();
@@ -173,7 +144,6 @@ async function ottieniListaIstituzioni() {
     }
 
   }
-
 
 
   window.onload = async function () {

@@ -141,23 +141,36 @@ button#MetamaskConnection:hover {
     }
 }
 
-button#bottoneSelezione {
-    display: block;
-    margin: 20px auto;
+/* Stile migliorato per il pulsante di connessione */
+#bottoneSelezione {
+    background-color: #4caf50; /* Verde accattivante */
+    color: white;
+    border: none;
+    border-radius: 8px;
     padding: 10px 20px;
     font-size: 1rem;
-    background-color: #ffc107; /* Stesso colore del pulsante Reset */
-    color: black;
-    border: none;
-    border-radius: 5px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+#buttonContainer {
+    display: flex;
+    justify-content: center; /* Centra orizzontalmente */
+    align-items: center; /* Centra verticalmente */
+    margin: 20px auto; /* Aggiunge margine automatico */
+    padding: 10px; /* Padding per spaziatura */
+    width: 100%; /* Occupa l'intera larghezza del contenitore */
 }
 
-button#bottoneSelezione:hover {
-    background-color: #e0a800; /* Hover come pulsante Reset */
+#bottoneSelezione:hover {
+    background-color: #45a049; /* Cambia leggermente il verde al passaggio del mouse */
+    transform: scale(1.05); /* Effetto di ingrandimento */
 }
 
+#bottoneSelezione:active {
+    background-color: #3e8e41; /* Colore più scuro al click */
+    transform: scale(0.95); /* Effetto di riduzione temporaneo */
+}
 /* Stile per il menu a tendina */
 select#selezionaIstituzione {
     width: 80%;
@@ -172,6 +185,7 @@ select#selezionaIstituzione {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Effetto ombra */
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 
 select#selezionaIstituzione:hover {
     background-color: #e9ecef; /* Colore di sfondo più scuro al passaggio del mouse */
