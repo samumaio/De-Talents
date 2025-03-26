@@ -13,6 +13,7 @@ contract CertificateNFT is ERC721 {
     address payable private owner;
     mapping(address => institutionStatus) private institutions;
     mapping(uint256 => string) private tokenURIs;
+    mapping(address => string ) public institutionsNames;
     //modifiers
     /// @notice Only verified istiutitons enabled
     modifier onlyIstitutions() {

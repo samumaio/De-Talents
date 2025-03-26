@@ -12,7 +12,7 @@ const SEP_URL = process.env.SEPOLIA_RPC_URL;
 const PK = process.env.PRIVATE_KEY;
 module.exports = {
   solidity: "0.8.28",
-  defaultNetwork: "hardhat",
+  defaultNetwork: "sepolia",
   networks: {
     sepolia: {
       url: SEP_URL,

@@ -12,6 +12,7 @@ contract UserNFT is ERC721 {
     uint256 public tokenCounter;
     uint256 public baseFee;
     address payable private owner;
+    mapping(address => string) public userNames;
     mapping(uint256 => string) private tokenURIs;
     //modifiers
     /// @notice Only verified istiutitons enabled
