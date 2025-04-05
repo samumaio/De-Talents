@@ -1,0 +1,54 @@
+/* Stile generale */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #444;
+}
+
+/* Contenitore per informazioni istituzione */
+#institutionInfo {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Stile per i paragrafi */
+#institutionInfo p {
+    font-size: 1.2rem;
+    color: #555;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+/* Responsività */
+@media (max-width: 768px) {
+    #institutionInfo {
+        width: 90%;
+    }
+}
+
+/* Colore per stato VERIFIED */
+.stato-rosso {
+    color: #dc3545; /* Rosso */
+    font-weight: bold;
+}
+
+/* Colore per stato UNVERIFIED */
+.stato-verde {
+    color: #28a745; /* Verde */
+    font-weight: bold;
+}
+

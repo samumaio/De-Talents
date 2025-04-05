@@ -8,40 +8,47 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /// @author samumaio
 /// @notice This smart contract mints a Certificate NFT on behalf of a certain user from the platform. Furthermore this contract should be a Soul bound token so as to not be transfered.
 
+pragma solidity ^0.8.28;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
 contract CertificateNFT is ERC721 {
     uint256 public tokenCounter;
     address payable private owner;
     mapping(address => institutionStatus) private institutions;
+    mapping(address => string) private institutionNames; // Mappatura per i nomi delle istituzioni
     mapping(uint256 => string) private tokenURIs;
-    mapping(address => string ) public institutionsNames;
-    //modifiers
-    /// @notice Only verified istiutitons enabled
+    address[] private institutionAddresses;
+
     modifier onlyIstitutions() {
         require(
             institutions[msg.sender] != institutionStatus.NOTANINSTITUTION,
-            notAnInstitution()
+            "notAnInstitution"
         );
         _;
     }
+
     modifier onlyOwner() {
-        require(msg.sender == owner, ownerOnly());
+        require(msg.sender == owner, "ownerOnly");
         _;
     }
-    //events
+
     event mintedCertificateNFT(
         address indexed recipient,
         uint256 indexed tokenId
     );
+
     event verifiedInstitution(address institution);
-    //enum
+
     enum institutionStatus {
-        NOTANINSTITUTION, // default value
+        NOTANINSTITUTION,
         UNVERIFIED,
         VERIFIED
     }
     //errors
     error unverifiedInstitution(address institution);
     error enteredInstitutionDoesNotExist();
+    error verifiedInstitution();
     error InstitutionAlreadyExist(address institution);
     //The searched address is not found on institutions mapping
     error notAnInstitution();
@@ -58,20 +65,18 @@ contract CertificateNFT is ERC721 {
         string memory tokenURI
     ) public onlyIstitutions {
         _mint(recipient, tokenCounter);
-        //Sets the tokenURI for the newly minted NFT
         tokenURIs[tokenCounter] = tokenURI;
         emit mintedCertificateNFT(recipient, tokenCounter);
         tokenCounter++;
     }
 
-    //Soul Bound Token - it is not possible to transfer the token from one wallet to the other
     function safeTransferFrom(
         address from,
         address to,
         uint256 tokenId,
         bytes memory data
     ) public virtual override {
-        require(false, soulBoundToken());
+        require(false, "soulBoundToken");
     }
 
     function transferFrom(
@@ -79,7 +84,7 @@ contract CertificateNFT is ERC721 {
         address to,
         uint256 tokenId
     ) public virtual override {
-        require(false, soulBoundToken());
+        require(false, "soulBoundToken");
     }
 
     function _safeTransfer(
@@ -88,33 +93,47 @@ contract CertificateNFT is ERC721 {
         uint256 tokenId,
         bytes memory data
     ) internal virtual override {
-        require(false, soulBoundToken());
+        require(false, "soulBoundToken");
     }
 
     function verifyInstitution(address institution) public onlyOwner {
         require(
             institutions[institution] != institutionStatus.NOTANINSTITUTION,
-            notAnInstitution()
+            "notAnInstitution"
         );
         institutions[institution] = institutionStatus.VERIFIED;
+        emit verifiedInstitution(institution);
     }
 
-    function addNewInstitution(address institution) public {
+    function addNewInstitution(address institution, string memory name) public {
         require(
-            (institutions[institution] != institutionStatus.NOTANINSTITUTION),
-            InstitutionAlreadyExist(institution)
+            !(institutions[institution] == institutionStatus.VERIFIED),
+            verifiedInstitutionAlreadyExist(institution)
         );
+        if (institutions[institution] == institutionStatus.NOTANINSTITUTION) {
+            institutionAddresses.push(institution);
+        }
         institutions[institution] = institutionStatus.UNVERIFIED;
+        institutionNames[institution] = name; // Salva il nome dell'istituzione
     }
 
     function getInstitutionStatus(
         address institution
     ) public view returns (institutionStatus) {
-        require(
-            institutions[institution] != institutionStatus.NOTANINSTITUTION,
-            notAnInstitution()
-        );
-        return (institutions[institution]);
+        if (institutions[institution] == institutionStatus.NOTANINSTITUTION) {
+            return institutionStatus.NOTANINSTITUTION;
+        }
+        return institutions[institution];
+    }
+
+    function getInstitutionName(
+        address institution
+    ) public view returns (string memory) {
+        return institutionNames[institution];
+    }
+
+    function getAllInstitutions() public view returns (address[] memory) {
+        return institutionAddresses;
     }
 
     function getTokenURI(uint256 tokenId) public view returns (string memory) {
@@ -123,5 +142,9 @@ contract CertificateNFT is ERC721 {
 
     function getCounter() public view returns (uint256) {
         return tokenCounter;
+    }
+
+    function getOwner() public view returns (address) {
+        return owner;
     }
 }
