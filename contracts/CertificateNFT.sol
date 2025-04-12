@@ -20,10 +20,23 @@ contract CertificateNFT is ERC721 {
     mapping(uint256 => string) private tokenURIs;
     address[] private institutionAddresses;
 
+    enum institutionStatus {
+        NOTANINSTITUTION,
+        UNVERIFIED,
+        VERIFIED
+    }
+
     modifier onlyIstitutions() {
         require(
             institutions[msg.sender] != institutionStatus.NOTANINSTITUTION,
-            "notAnInstitution"
+            notAnInstitution()
+        );
+        _;
+    }
+    modifier onlyVerifiedInstitutions() {
+        require(
+            institutions[msg.sender] == institutionStatus.VERIFIED,
+            unverifiedInstitution(msg.sender)
         );
         _;
     }
@@ -40,15 +53,10 @@ contract CertificateNFT is ERC721 {
 
     event verifiedInstitution(address institution);
 
-    enum institutionStatus {
-        NOTANINSTITUTION,
-        UNVERIFIED,
-        VERIFIED
-    }
     //errors
     error unverifiedInstitution(address institution);
     error enteredInstitutionDoesNotExist();
-    error verifiedInstitution();
+    error verifiedInstitutionAlreadyExists(address institution);
     error InstitutionAlreadyExist(address institution);
     //The searched address is not found on institutions mapping
     error notAnInstitution();
@@ -108,7 +116,7 @@ contract CertificateNFT is ERC721 {
     function addNewInstitution(address institution, string memory name) public {
         require(
             !(institutions[institution] == institutionStatus.VERIFIED),
-            verifiedInstitutionAlreadyExist(institution)
+            verifiedInstitutionAlreadyExists(institution)
         );
         if (institutions[institution] == institutionStatus.NOTANINSTITUTION) {
             institutionAddresses.push(institution);
@@ -120,9 +128,6 @@ contract CertificateNFT is ERC721 {
     function getInstitutionStatus(
         address institution
     ) public view returns (institutionStatus) {
-        if (institutions[institution] == institutionStatus.NOTANINSTITUTION) {
-            return institutionStatus.NOTANINSTITUTION;
-        }
         return institutions[institution];
     }
 

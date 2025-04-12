@@ -14,7 +14,7 @@ describe("Certificate NFTs Unit Tests", async function () {
         const { certificateNFT, } = await loadFixture(deployCertificateNFT);
         const signers = await ethers.getSigners();
         const institution = signers[1];
-        await certificateNFT.addNewInstitution(institution)
+        await certificateNFT.addNewInstitution(institution, "testInstitution")
         //asserts the institution exists
         expect(await certificateNFT.getInstitutionStatus(institution.getAddress())).not.to.be.reverted;
         //Asserts the institution is added as unverified
@@ -27,7 +27,7 @@ describe("Certificate NFTs Unit Tests", async function () {
         const notOwner = signers[1];
         const certificateNFTWithNotOwner = await certificateNFT.connect(notOwner)
 
-        await certificateNFT.addNewInstitution(institution)
+        await certificateNFT.addNewInstitution(institution, "testInstitution")
         //asserts the institution exists
         await expect(await certificateNFT.verifyInstitution(institution)).not.to.be.reverted;
         //Asserts only that only the owner can verify insitution
@@ -40,7 +40,7 @@ describe("Certificate NFTs Unit Tests", async function () {
         const setTokenURI = "default";
         const signers = await ethers.getSigners();
         const institution = signers[1];
-        await certificateNFT.addNewInstitution(institution);
+        await certificateNFT.addNewInstitution(institution, "testInstitution");
         const notOwner = signers[7];
         const certificateNFTWithNotOwner = await certificateNFT.connect(notOwner)
         //Connects the contract to a notOwner user

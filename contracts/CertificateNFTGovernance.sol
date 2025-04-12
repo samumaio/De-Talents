@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 import "./CertificateNFT.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
     struct Proposal {
@@ -12,6 +12,7 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
         bool executed;
     }
     mapping(uint256 => Proposal) public s_proposals;
+    //durata di inserimento nella blacklist in secondi (90 giorni)
     uint256 constant REJECT_DURATION = 7776000;
     //associa un indirizzo di un istituzione rifiutata al timestamp in cui è stata rifiutata
     mapping(address => uint256) public s_rejectedInstitutions;
@@ -20,12 +21,13 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
     uint256 private s_proposalCounter;
 
     //events
+    //durata del proposal in secondi
     event proposalCreated(
         address indexed institution,
         uint256 indexed duration
     );
     //il voto di un istituzione non è mostrato nei logs
-    event proposalVoted(uint256 indexed proposalId, address indexed voter);
+    event proposalVoted(uint256 indexed proposalId);
     event proposalExecuted(address indexed institution, bool indexed approved);
     //errors
     error notUnverifiedInstitution(address institution);
@@ -54,16 +56,12 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
     }
 
     //se isDay == true allora l'unita di misura di duration e' in giorni altrimenti in secondi
-    function createProposal(
-        address institution,
-        uint256 duration,
-        bool isDay
-    ) public notRejected {
+    function createProposal(uint256 duration, bool isDay) public notRejected {
         //Controllo che l'istituzione da verificare sia presente nel mapping e che il proprio status sia UNVERIFIED
         //funzione del contatto padre, viene pagato il gas anche se si tratta di una view function
         require(
-            getInstitutionStatus(institution) == institutionStatus.UNVERIFIED,
-            notUnverifiedInstitution(institution)
+            getInstitutionStatus(msg.sender) == institutionStatus.UNVERIFIED,
+            notUnverifiedInstitution(msg.sender)
         );
         //Si imposta come durata massima di elezione di una proposta 90 giorni
         require(
@@ -74,13 +72,13 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
             duration *= 86400; //si converte la durata da giorni a secondi
         }
         s_proposals[s_proposalCounter] = Proposal({
-            institutionAddress: institution,
+            institutionAddress: msg.sender,
             votesFor: 0,
             votesAgainst: 0,
             endTime: block.timestamp + duration,
             executed: false
         });
-        emit proposalCreated(institution, duration);
+        emit proposalCreated(msg.sender, duration);
         s_proposalCounter++;
     }
 
@@ -104,7 +102,7 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
             s_proposals[proposalId].votesAgainst++;
         }
         s_hasVoted[keyHash] = true;
-        emit proposalVoted(proposalId, msg.sender);
+        emit proposalVoted(proposalId);
     }
 
     function executeProposal(uint256 proposalId) public onlyOwner {
@@ -123,6 +121,12 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
         if (proposal.votesFor > proposal.votesAgainst) {
             verifyInstitution(proposal.institutionAddress);
             approved = true;
+        } else {
+            //se i voti sono uguali l'istituzione può farsi votare nuovamente senza essere inserita nella blacklist
+            if (proposal.votesFor != proposal.votesAgainst) {
+                s_rejectedInstitutions[proposal.institutionAddress] = block
+                    .timestamp;
+            }
         }
         emit proposalExecuted(proposal.institutionAddress, approved);
     }
@@ -132,12 +136,13 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
     function getProposal(
         uint256 proposalId
     ) public view returns (Proposal memory) {
-        //verifica che l'ID esista
-        require(proposalId < s_proposalCounter, proposalIdNotFound(proposalId));
-        return (s_proposals[proposalId]);
+        Proposal memory proposal = s_proposals[proposalId];
+        // id della proposta deve esistere
+        require(proposal.endTime != 0, proposalIdNotFound(proposalId));
+        return (proposal);
     }
 
-    //restituisce il numero di giorni mancanti alla
+    //restituisce il numero di giorni mancanti alla riammissione
     function getDaysLeft(address institution) public view returns (uint256) {
         uint256 lastRejection = s_rejectedInstitutions[institution];
         if (
@@ -151,5 +156,9 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
 
     function getProposalCounter() public view returns (uint256) {
         return s_proposalCounter;
+    }
+
+    function getRejectDuration() public view returns (uint256) {
+        return REJECT_DURATION;
     }
 }
