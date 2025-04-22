@@ -1,7 +1,6 @@
 import { CONTRACT_ABI } from '../abiCertificateNFT.js';
 
 const CONTRACT_ADDRESS = "0x44D02689910920d71354215931ecEC1A04C2156d"; // Inserisci l'indirizzo del contratto
-
 async function fetchInstitutionInfo() {
   if (!window.ethereum) {
     alert("Please install MetaMask!");
@@ -50,5 +49,4 @@ async function fetchInstitutionInfo() {
     console.error("Error fetching institution info:", error);
   }
 }
-
 window.onload = fetchInstitutionInfo;

@@ -51,7 +51,7 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
         _;
     }
 
-    constructor() {
+    constructor() CertificateNFT() {
         s_proposalCounter = 0;
     }
 
@@ -132,7 +132,6 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
     }
 
     //getters
-
     function getProposal(
         uint256 proposalId
     ) public view returns (Proposal memory) {
@@ -140,6 +139,14 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
         // id della proposta deve esistere
         require(proposal.endTime != 0, proposalIdNotFound(proposalId));
         return (proposal);
+    }
+
+    function getAllProposals() public view returns (Proposal[] memory) {
+        Proposal[] memory proposals = new Proposal[](s_proposalCounter);
+        for (uint256 i = 0; i < s_proposalCounter; i++) {
+            proposals[i] = s_proposals[i];
+        }
+        return proposals;
     }
 
     //restituisce il numero di giorni mancanti alla riammissione
@@ -158,7 +165,12 @@ contract CertificateNFTGovernance is CertificateNFT, ReentrancyGuard {
         return s_proposalCounter;
     }
 
-    function getRejectDuration() public view returns (uint256) {
+    function hasVoted(uint256 proposalId) public view returns (bool) {
+        bytes32 keyHash = keccak256(abi.encodePacked(proposalId, msg.sender));
+        return s_hasVoted[keyHash];
+    }
+
+    function getRejectDuration() public pure returns (uint256) {
         return REJECT_DURATION;
     }
 }
