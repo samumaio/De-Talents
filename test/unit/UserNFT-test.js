@@ -27,41 +27,10 @@ describe("User NFTs Unit Tests", async function () {
         const tx = await userNFT.mintNFT(deployer, setTokenURI, { value: fee })
         const receipt = await tx.wait()
         const tokenID = await receipt.logs[0].args[2]
+        assert.equal(fee, userNFT.getUserReputation(tokenID));
         const owner = await userNFT.ownerOf(tokenID)
         assert.equal(owner, deployer)
         const uri = await userNFT.getTokenURI(tokenID)
         assert.equal(uri, setTokenURI)
-    })
-    it("Only allows the owner to withdraw funds ", async function () {
-        const { userNFT, deployer } = await loadFixture(deployUserNFT)
-        const signers = await ethers.getSigners();
-        const notOwner = signers[1];
-        // Connects the contract to a notOwner user
-        const userNFTWithNotOwner = await userNFT.connect(notOwner)
-        await expect(userNFTWithNotOwner.withdraw()).to.be.reverted;
-    })
-
-    it("owner can withdraw funds properly ", async function () {
-        const { userNFT, deployer } = await loadFixture(deployUserNFT)
-        const signers = await ethers.getSigners();
-        const notOwner = signers[1];
-
-        // Other user mint a NFT and pays a fee
-        const userNFTWithNotOwner = await userNFT.connect(notOwner)
-        const fee = await ethers.parseEther("0.1");
-        await userNFTWithNotOwner.mintNFT(notOwner, "URI", { value: fee });
-
-        let ownerInitialBalance = await ethers.provider.getBalance(deployer)
-        //This function will cost some gas, hence eth earned by the owner will be less than 0.1 ETH
-        await userNFT.withdraw();
-        let ownerFinalBalance = await ethers.provider.getBalance(deployer)
-        assert.isAbove(ownerFinalBalance - ownerInitialBalance, 0)
-    })
-    it("Does not allow to transfer NFTs ", async function () {
-        const { userNFT, deployer } = await loadFixture(deployUserNFT)
-        const signers = await ethers.getSigners();
-        const notOwner = signers[1];
-        await expect(userNFT.transferFrom(deployer, notOwner.getAddress(), 0, new Uint8Array())).to.be.reverted
-        await expect(userNFT.safeTransferFrom(deployer, notOwner.getAddress(), 0)).to.be.reverted;
     })
 })

@@ -1,14 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
-
-//import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
 /// @title Certificate ERC 721 NFT
 /// @author samumaio
 /// @notice This smart contract mints a Certificate NFT on behalf of a certain user from the platform. Furthermore this contract should be a Soul bound token so as to not be transfered.
-
-pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
@@ -51,7 +45,8 @@ contract CertificateNFT is ERC721 {
         uint256 indexed tokenId
     );
 
-    event verifiedInstitution(address institution);
+    event verifiedInstitution(address indexed institution);
+    event newInstitutionAdded(address indexed institution);
 
     //errors
     error unverifiedInstitution(address institution);
@@ -123,6 +118,7 @@ contract CertificateNFT is ERC721 {
         }
         institutions[institution] = institutionStatus.UNVERIFIED;
         institutionNames[institution] = name; // Salva il nome dell'istituzione
+        emit newInstitutionAdded(institution);
     }
 
     function getInstitutionStatus(
