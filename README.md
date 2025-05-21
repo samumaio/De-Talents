@@ -89,4 +89,5 @@ Variabili principali
 **Indirizzo dello smart contract:**  0xE7dF2b925764a2a7474F9a9F35082FB10686D886
 
 ---
+Nel seguente repository è possibile trovare il front-end della piattaforma.
 Repository De-Talents-Front-End: https://github.com/samumaio/De-Talents-Front-End.git
