@@ -90,4 +90,5 @@ Variabili principali
 
 ---
 Nel seguente repository è possibile trovare il front-end della piattaforma.
+
 Repository De-Talents-Front-End: https://github.com/samumaio/De-Talents-Front-End.git
