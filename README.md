@@ -43,12 +43,12 @@ Variabili principali:
 
 - tokenURIs, associa ogni tokenId a un URI che contiene i metadati del token.
 
-# Funzionalità Principali:
+## Funzionalità Principali:
 - addNewInstitution(address institution, string memory name): permette di creare una nuova istituzione, e prende in input l'indirizzo dell'istituzione e il nome. Viene fatto un controllo se l'istituzione non è già presente nel mapping, e se così non fosse, salva l'indirizzo e il nome, e pone lo stato dell'istituzione a UNVERIFIED.
 - mintNFT(address recipient, string memory tokenURI): solo le istituzioni possono emanare NFT ad un specifico indirizzo. Prende in input l'indirizzo del destinatario, e il tokenURI, ovvero il link ai dati del certificato.
 - safeTransferFrom, transferFrom, _safeTransfer: funzioni sovrascritte per impedire il trasferimento degli NFT, e tutte bloccano il trasferimento con un errore soulBoundToken(). Questo è fatto perchè gli NFT sono personali e intrasferibili, garantendo che solo il destinatario possa conservargli.
 
-# Getter:
+## Getter:
 - getTokenURI(tokenId): restituisce il link ai metadati di un NFT.
 - getCounter(): restituisce il numero totale di NFT creati.
 - getInstitutionStatus(address institution): mostra lo stato di un’istituzione.
