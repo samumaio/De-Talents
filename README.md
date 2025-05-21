@@ -57,3 +57,33 @@ Variabili principali:
 - getOwner(): restituisce l’indirizzo del proprietario del contratto.
 
 **Indirizzo dello smart contract:** 0x1909ad6726Af1DAa6dcBf9610b07dCaD98642C12
+
+---
+# CertificateNFTGovernance - Smart Contract ERC721
+Questo smart contract introduce un meccanismo di governance decentralizzato per la gestione delle istituzioni che vogliono verificarsi e coniare Certificate NFT. Le istituzioni possono proporre la propria verifica, votare sulle proposte e viene fatta la gestione della blacklist per quelle rifiutate.
+## Struttura del Contratto
+Variabili principali
+- s_proposalCounter: Contatore delle proposte di verifica create.
+- s_proposals: Mapping che memorizza tutte le proposte di verifica delle istituzioni.
+- s_rejectedInstitutions: Associa un indirizzo di un’istituzione rifiutata al timestamp in cui è stata rifiutata.
+- s_hasVoted: Mapping che tiene traccia degli istituti che hanno già votato una proposta.
+- REJECT_DURATION: Durata (90 giorni) della blacklist per istituzioni rifiutate.
+
+
+
+## Funzionalità Principali:
+
+- createProposal(uint256 duration, bool isDay): funzione che permette ad una istituzione registrata e non verificata di creare una proposta per la propria verifica. La durata massima di elezione è di 90 giorni. Quando è l'ultimo giorno di votazione, la durata viene converita da giorni a secondi automaticamente.
+- vote(uint256 proposalId, bool voteFor): funzione che permette alle istituzioni verificate di votare per una istituzione in via di verifica. Vengono fatti dei controlli se la proposta è ancora valida, e se l'istituzione votante è verificata o meno.
+- executeProposal(uint256 proposalId): funzione che può essere eseguita solo dall'owner, e la proposta deve essere già conclusa. Se i voti favorevoli sono maggiori rispetto a quelli sfavorevoli, l'istituzione viene verificata. In caso contrario, se i voti sono identici, l'istituzione può ricreare la proposta, altrimenti viene inserita nella blacklist. 
+- getDaysLeft(address institution): restituisce i giorni mancanti alla riammissione. Infatti, dopo di che l'istituzione può ricreare la proposta. 
+
+## Getter:
+- getProposal(uint256 proposalId): Restituisce i dettagli di una proposta.
+- getAllProposals(): Restituisce tutte le proposte esistenti.
+- getProposalCounter(): Mostra il numero totale di proposte create.
+- hasVoted(uint256 proposalId): Verifica se un'istituzione ha già votato.
+- getRejectDuration(): Restituisce la durata della blacklist.
+
+  
+**Indirizzo dello smart contract:**  0xE7dF2b925764a2a7474F9a9F35082FB10686D886
