@@ -23,4 +23,4 @@ safeTransferFrom, transferFrom, _safeTransfer: funzioni sovrascritte per impedir
 - getCounter(): restituisce il numero totale di NFT creati.
 - getTokenURI(tokenId): restituisce il link ai metadati di un NFT specifico.
 
-** Indirizzo dello smart contract: **0x3e1a9dE3ac110F6b5b5cf043CED6f4c70E08e58f
+**Indirizzo dello smart contract:** 0x3e1a9dE3ac110F6b5b5cf043CED6f4c70E08e58f
