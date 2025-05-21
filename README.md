@@ -4,13 +4,11 @@ Questo smart contract permette agli utenti di creare un NFT personale destinato 
 
 ## Struttura del contratto
 
-Sono presenti tre variabili principali:
+Sono presenti le variabili principali:
 
 - tokenCounter: tiene traccia del numero di NFT rilasciati. Viene incrementato ogni volta che viene creato un nuovo certificato.
 - baseFee: rappresenta la tariffa minima da pagare per coniare un NFT.
 - owner: memorizza l'indirizzo del creatore del contratto e viene inizializzato al momento della creazione dello smart contract.
-
-## Mapping:
 - tokenURIs: associa ogni tokenId a un URI che contiene i metadati del token (immagini, descrizione, attributi). Per ottenere le informazioni di un NFT, si usa la funzione getTokenURI(tokenId).
 
 ## Funzionalità Principali:
