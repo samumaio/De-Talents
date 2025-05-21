@@ -18,7 +18,7 @@ mintNFT(address recipient, string memory tokenURI): rilascia il NFT ad un specif
 
 safeTransferFrom, transferFrom, _safeTransfer: funzioni sovrascritte per impedire il trasferimento degli NFT, e tutte bloccano il trasferimento con un errore soulBoundToken(). Questo è fatto perchè gli NFT sono personali e intrasferibili, garantendo che solo il destinatario possa conservargli.
 
-##Getter:
+## Getter:
 - getBaseFee(): restituisce la commissione richiesta per il minting.
 - getCounter(): restituisce il numero totale di NFT creati.
 - getTokenURI(tokenId): restituisce il link ai metadati di un NFT specifico.
