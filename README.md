@@ -1,7 +1,8 @@
 # UserNFT - Smart Contract ERC721
 
-Questo smart contract permette agli utenti di creare un NFT personale destinato a un indirizzo specifico ed è basato sullo standard ERC721. Ciò significa che gli NFT generati sono non fungibili, ovvero unici e non interscambiabili. Questo standard è stato scelto perché gli NFT rappresentano certificati digitali associati a una persona e non possono essere rivenduti o trasferiti, rendendoli ideali per attestati, identità digitali e membership.
-Struttura del contratto
+Questo smart contract permette agli utenti di creare un NFT personale destinato a un indirizzo specifico ed è basato sullo standard ERC721. Ciò significa che gli NFT generati sono non fungibili, ovvero unici e non interscambiabili. Questo standard è stato scelto perché gli NFT rappresentano certificati digitali associati a una persona e non possono essere rivenduti o trasferiti.
+
+## Struttura del contratto
 
 Sono presenti tre variabili principali:
 
@@ -13,10 +14,8 @@ Sono presenti tre variabili principali:
 - tokenURIs: associa ogni tokenId a un URI che contiene i metadati del token (immagini, descrizione, attributi). Per ottenere le informazioni di un NFT, si usa la funzione getTokenURI(tokenId).
 
 ## Funzionalità Principali:
-
-mintNFT(address recipient, string memory tokenURI): rilascia il NFT ad un specifico indirizzo. Prende in input l'indirizzo del destinatario, e il tokenURI, ovvero il link ai dati del certificato. 
-
-safeTransferFrom, transferFrom, _safeTransfer: funzioni sovrascritte per impedire il trasferimento degli NFT, e tutte bloccano il trasferimento con un errore soulBoundToken(). Questo è fatto perchè gli NFT sono personali e intrasferibili, garantendo che solo il destinatario possa conservargli.
+- mintNFT(address recipient, string memory tokenURI): rilascia il NFT ad un specifico indirizzo. Prende in input l'indirizzo del destinatario, e il tokenURI, ovvero il link ai dati del certificato. 
+- safeTransferFrom, transferFrom, _safeTransfer: funzioni sovrascritte per impedire il trasferimento degli NFT, e tutte bloccano il trasferimento con un errore soulBoundToken(). Questo è fatto perchè gli NFT sono personali e intrasferibili, garantendo che solo il destinatario possa conservargli.
 
 ## Getter:
 - getBaseFee(): restituisce la commissione richiesta per il minting.
