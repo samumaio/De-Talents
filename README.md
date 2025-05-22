@@ -86,6 +86,26 @@ Variabili principali
 - hasVoted(uint256 proposalId): Verifica se un'istituzione ha già votato.
 - getRejectDuration(): Restituisce la durata della blacklist.
 
+# Project Factory 
+
+Questo Smart Contract permette di creare in maniera trasparente nuovi progetti open-source. Attraverso un factory pattern, un utente può lanciare un progetto e regolare i contribuenti che vi possono partecipare. Il principio alla base di questa interazione consiste nel garantire lo sviluppo di codice open-source in maniera trasperente e priva di intermediari tra proprietario e contribuenti. 
+
+## Struttura del contratto
+- mapping(address => bool) private s_projectAddresses - Mapping di tutti i progetti creati a partire da questo smart contract;
+- uint256 private s_rewardTokenValue   - Valore iniziale dei Reward Tokens (RWT);
+
+- function createProject(string memory name,string memory description,uint256 duration) -> Funzione che permette la creazione di un progetto, esegue il deploy di un nuovo smart contract ProjectContract. Il creatore del progetto deposita una quantità di ETH iniziale divisa in modo proporzionale tra i contribuenti. 
+
+- function mintTokens(address recipient, uint256 amount) -> Funzione che permette di coniare un certo di numero di token di Reputazione (RWT) per aumentare la reputazione di un contribuente al progetto. Invocabile solo ad un indirizzo di uno smart contract di tipo ProjectContract
+
+# Project Contract 
+
+Questo smart contract permette di regolare lo sviluppo di un progetto open-source. 
+
+## Struttura del contratto 
+
+- uint256 private s_rewardPerToken -> Rappresenta la ricompensa ;
+
   
 **Indirizzo dello smart contract:**  0xE7dF2b925764a2a7474F9a9F35082FB10686D886
 
