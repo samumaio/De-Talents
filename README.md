@@ -1,6 +1,7 @@
 # UserNFT - Smart Contract ERC721
 
-Questo smart contract permette agli utenti di creare un NFT personale destinato a un indirizzo specifico ed è basato sullo standard ERC721. Ciò significa che gli NFT generati sono non fungibili, ovvero unici e non interscambiabili. Questo standard è stato scelto perché gli NFT rappresentano certificati digitali associati a una persona e non possono essere rivenduti o trasferiti.
+Questo smart contract permette agli utenti di creare un NFT personale destinato a un indirizzo specifico ed è basato sullo standard ERC721. Ciò significa che gli NFT generati sono non fungibili, ovvero unici e non interscambiabili. Questo standard è stato scelto perché gli NFT rappresentano certificati digitali associati a una persona.
+Questo NFT garantisce una riserva di ETH quando viene utilizzato per lo svolgimento di progetti.
 
 ## Struttura del contratto
 
