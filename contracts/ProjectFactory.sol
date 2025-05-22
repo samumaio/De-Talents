@@ -16,6 +16,8 @@ contract ProjectFactory is ERC20 {
     event rewardTokensMinted(address indexed recipient, uint256 indexed amount);
 
     error notAllowedToMint();
+    error failedTransaction();
+    error initialRewardisZero();
 
     constructor(uint256 rewardTokenValue) ERC20("RewardToken", "RWT") {
         s_rewardTokenValue = rewardTokenValue;
@@ -24,20 +26,24 @@ contract ProjectFactory is ERC20 {
     function createProject(
         string memory name,
         string memory description,
-        uint256 duration,
-        uint256 initialReward
-    ) external {
+        uint256 duration
+    ) external payable {
+        require(msg.value > 0, initialRewardisZero());
         ProjectContract newProject = new ProjectContract(
             name,
             description,
             duration,
-            initialReward,
+            msg.value,
             msg.sender,
             s_rewardTokenValue,
             address(this)
         );
         s_projectAddresses[address(newProject)] = true;
         s_ownerProjects[msg.sender].push(address(newProject));
+        (bool callSuccess, ) = payable(address(newProject)).call{
+            value: msg.value
+        }("");
+        require(callSuccess, failedTransaction());
         emit projectCreated(address(newProject));
     }
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./ProjectFactory.sol";
 import "./UserNFT.sol";
 
@@ -17,9 +18,7 @@ contract ProjectContract is IERC721Receiver {
 
     uint256 private s_rewardPerToken;
     uint256 private s_stakingDuration;
-    uint256 private s_rewardRate;
     uint256 private s_totalStakedReputation;
-    uint256 private s_lastUpdateTime;
 
     mapping(address => uint256) private s_userRewards;
     // amount of rewardPerToken since the last time the user has staked or withdrawn
@@ -29,12 +28,7 @@ contract ProjectContract is IERC721Receiver {
 
     mapping(address => uint256) private s_contributorsTokenID;
 
-    address private s_owner;
-    string private s_name;
-    string private s_description;
-    uint256 private s_reward;
     mapping(address => bool) private s_hasApplied;
-    mapping(address => bool) private s_hasStaked;
     address[] private s_applicants;
     mapping(address => bool) private s_contributors;
     address[] private s_contributorsAddress;
@@ -42,7 +36,6 @@ contract ProjectContract is IERC721Receiver {
     address[] private s_funders;
     mapping(uint256 => Milestone) private s_milestones;
     uint256 private s_deadline;
-    bool private s_success;
     uint256 private s_milestoneCounter;
     uint256 private s_contributorCounter;
 
@@ -62,6 +55,7 @@ contract ProjectContract is IERC721Receiver {
     error projectNotEnded();
     error applicationNotSent();
     error applicationAlreadySent(address);
+    error insufficientTotalReputation(uint256);
 
     event rewardIncreased(
         address indexed funder,
@@ -74,15 +68,23 @@ contract ProjectContract is IERC721Receiver {
     event milestoneCompleted(uint256 indexed milestoneIndex);
     event nftStaked(uint256 indexed tokenId);
     modifier onlyOwner() {
-        require(msg.sender == s_owner, notOwner(msg.sender));
+        require(msg.sender == s_state.owner, notOwner(msg.sender));
         _;
     }
     modifier notEnded() {
-        require(block.timestamp < s_deadline, projectEnded());
+        require(block.timestamp < s_state.deadline, projectEnded());
         _;
     }
     modifier onlyAssignedContributor(address contributor) {
         require(msg.sender == contributor, notAssignedContributor(contributor));
+        _;
+    }
+    modifier allowedToStake(uint256 tokenId) {
+        require(userNft.ownerOf(tokenId) == address(this), nftNotStaked());
+        require(
+            userNft.getApproved(tokenId) == msg.sender,
+            notAllowedToStake()
+        );
         _;
     }
 
@@ -95,11 +97,22 @@ contract ProjectContract is IERC721Receiver {
         address responsible;
     }
 
+    struct ProjectState {
+        string name;
+        string description;
+        uint256 reward;
+        uint256 rewardRate;
+        uint256 deadline;
+        address owner;
+        bool success;
+        uint256 lastUpdateTime;
+    }
+    ProjectState private s_state;
+
     function setNFTContractAddress(address nftContractAddress) public {
         userNft = UserNFT(nftContractAddress);
     }
 
-    //duration è passato a funzione come durata in giorni
     constructor(
         string memory name,
         string memory description,
@@ -109,112 +122,109 @@ contract ProjectContract is IERC721Receiver {
         uint256 rewardTokenValue,
         address factoryAddress
     ) {
-        s_reward = initialReward;
-        s_rewardRate = (s_reward) / (duration * 86400);
         //since solidity cannot handle floating point values, if the rewardRate is low it may be truncated to 0
-        require(s_rewardRate != 0, insufficientRewardRate());
-        s_owner = ownerAddress;
+        uint256 rewardRate = initialReward / (duration * 86400);
+        require(rewardRate > 0, insufficientRewardRate());
+        s_state = ProjectState(
+            name,
+            description,
+            initialReward,
+            rewardRate,
+            block.timestamp + (duration * 86400),
+            ownerAddress,
+            false,
+            0
+        );
         s_rewardTokenValue = rewardTokenValue;
-        s_name = name;
-        s_description = description;
-        s_deadline = block.timestamp + (duration * 86400);
-        s_success = false;
         s_milestoneCounter = 0;
         s_contributorCounter = 0;
         s_totalStakedReputation = 0;
-        s_lastUpdateTime = 0;
         factory = ProjectFactory(factoryAddress);
     }
 
-    function retrieveNFT(uint256 tokenId) external {
+    function retrieveNFT(
+        uint256 tokenId
+    ) external virtual allowedToStake(tokenId) {
         //this function is invoked to unstake an NFT. It checks if the milestone assigned to the staker are completed otherwise it decrease the staked NFT reputation
-        require(s_contributors[msg.sender], notAContributor());
-        require(userNft.ownerOf(tokenId) == msg.sender, notAllowedToStake());
-        require(s_hasStaked[msg.sender], nftNotStaked());
+        uint256 amount = s_userReputation[msg.sender];
+        require(
+            amount <= s_totalStakedReputation,
+            insufficientTotalReputation(s_totalStakedReputation)
+        );
+        require(s_totalStakedReputation > 0, totalStakedReputationIsZero());
         Milestone memory milestone;
         uint256 penality = 0;
-        uint256 benefits = 0;
-        // uint256 i=0;
-        // while (milestonesCompleted && i<s_milestoneCounter){
-        //     milestonesCompleted = s_milestones[i].responsible == msg.sender && s_milestones[i].completed;
-        //     i++;
-        // }
         for (uint256 i = 0; i < s_milestoneCounter; i++) {
             milestone = s_milestones[i];
             if ((milestone.responsible == msg.sender) && !milestone.completed) {
-                penality += (milestone.rewardTokens / 2) * s_rewardTokenValue;
+                penality += Math.mulDiv(
+                    milestone.rewardTokens,
+                    s_rewardTokenValue,
+                    2
+                );
             }
         }
         if (penality != 0) {
             userNft.withdrawLiquidity(tokenId, penality);
         }
         //update rewardPerToken
-        s_rewardPerToken +=
-            (s_rewardRate / s_totalStakedReputation) *
-            (block.timestamp - s_lastUpdateTime);
+        s_rewardPerToken += Math.mulDiv(
+            s_state.rewardRate,
+            (block.timestamp - s_state.lastUpdateTime),
+            s_totalStakedReputation
+        );
         //users reward are calculated
         s_userRewards[msg.sender] +=
             s_userReputation[msg.sender] *
             (s_rewardPerToken - s_userReputation[msg.sender]);
         //updates the last updated time
-        s_lastUpdateTime = block.timestamp;
-        uint256 amount = s_userReputation[msg.sender];
-        s_userReputation[msg.sender] -= amount;
+        s_state.lastUpdateTime = block.timestamp;
+        s_userReputation[msg.sender] = 0;
         s_totalStakedReputation -= amount;
         userNft.safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
-    function stakeNFT(uint256 tokenId) external notEnded {
+    function stakeNFT(
+        uint256 tokenId,
+        uint256 amountStaked
+    ) external virtual notEnded {
         require(s_contributors[msg.sender], notAContributor());
         require(userNft.ownerOf(tokenId) == msg.sender, notAllowedToStake());
         s_contributorsTokenID[msg.sender] = tokenId;
+        s_lastUserRewardPerToken[msg.sender] = 0;
         userNft.safeTransferFrom(msg.sender, address(this), tokenId);
-        uint256 reputation = userNft.getUserReputation(tokenId);
-        s_totalStakedReputation += reputation;
-        s_userReputation[msg.sender] += reputation;
-        s_hasStaked[msg.sender] = true;
+        //approves the userNFT to be retrieved by the original owner anytime
+        userNft.approve(msg.sender, tokenId);
+        s_totalStakedReputation += amountStaked;
+        s_userReputation[msg.sender] += amountStaked;
         emit nftStaked(tokenId);
     }
 
     function updateStaking(
         uint256 tokenId,
-        uint256 amount,
-        address previousOwner
-    ) public notEnded {
-        require(s_contributors[previousOwner], notAContributor());
-        require(s_hasStaked[previousOwner], nftNotStaked());
+        uint256 amount
+    ) public virtual notEnded allowedToStake(tokenId) {
         require(s_totalStakedReputation > 0, totalStakedReputationIsZero());
         //update rewardPerToken
-        s_rewardPerToken +=
-            (s_rewardRate / s_totalStakedReputation) *
-            (block.timestamp - s_lastUpdateTime);
+        s_rewardPerToken += Math.mulDiv(
+            s_state.rewardRate,
+            (block.timestamp - s_state.lastUpdateTime),
+            s_totalStakedReputation
+        );
         //users reward are calculated
         s_userRewards[msg.sender] +=
             s_userReputation[msg.sender] *
-            (s_rewardPerToken - s_userReputation[msg.sender]);
+            (s_rewardPerToken - s_lastUserRewardPerToken[msg.sender]);
+        s_lastUserRewardPerToken[msg.sender] = s_userRewards[msg.sender];
         //updates the last updated time
-        s_lastUpdateTime = block.timestamp;
+        s_state.lastUpdateTime = block.timestamp;
         s_userReputation[msg.sender] += amount;
         s_totalStakedReputation += amount;
     }
 
-    // function updateStaking(uint256 amount) internal {
-    //     require(s_totalStakedReputation>0,totalStakedReputationIsZero());
-    //     //update rewardPerToken
-    //     s_rewardPerToken += (s_rewardRate/s_totalStakedReputation) * (block.timestamp - s_lastUpdateTime);
-    //     //users reward are calculated
-    //     s_userRewards[msg.sender] += s_userReputation[msg.sender] * (s_rewardPerToken - s_userReputation[msg.sender]);
-    //     //updates the last updated time
-    //     s_lastUpdateTime = block.timestamp;
-    //     s_userReputation[msg.sender] += amount;
-    //     s_totalStakedReputation += amount;
-    // }
-
-    function withdrawRewards(uint256 tokenId) public {
-        require(userNft.ownerOf(tokenId) == msg.sender, notAllowedToStake());
-        require(s_hasStaked[msg.sender], nftNotStaked());
-        require(s_contributors[msg.sender], notAContributor());
-
+    function withdrawRewards(
+        uint256 tokenId
+    ) public virtual allowedToStake(tokenId) {
         uint256 amount = s_userRewards[msg.sender];
         require(amount > 0, noRewardsToWithdraw());
         s_userRewards[msg.sender] = 0;
@@ -298,8 +308,7 @@ contract ProjectContract is IERC721Receiver {
         s_milestones[index].completed = true;
         updateStaking(
             tokenID,
-            s_milestones[index].rewardTokens * s_rewardTokenValue,
-            s_milestones[index].responsible
+            s_milestones[index].rewardTokens * s_rewardTokenValue
         );
         //mints the RWTs for the responsible of the milestone
         factory.mintToken(msg.sender, s_milestones[index].rewardTokens);
@@ -307,11 +316,11 @@ contract ProjectContract is IERC721Receiver {
     }
 
     function setName(string memory name) public onlyOwner notEnded {
-        s_name = name;
+        s_state.name = name;
     }
 
     function postpone(uint256 duration) public onlyOwner notEnded {
-        s_deadline += (duration * 86400);
+        s_state.deadline += (duration * 86400);
     }
 
     function sendApplication() external notEnded {
@@ -339,17 +348,19 @@ contract ProjectContract is IERC721Receiver {
     function setDescription(
         string memory description
     ) public onlyOwner notEnded {
-        s_description = description;
+        s_state.description = description;
     }
 
     function setOutcome(bool success) public onlyOwner notEnded {
-        s_success = success;
+        s_state.success = success;
     }
 
     function addFunds() external payable notEnded {
         require(msg.value > 0, invalidFundValue());
-        s_reward += msg.value;
-        s_rewardRate = s_reward / ((s_deadline - block.timestamp));
+        s_state.reward += msg.value;
+        s_state.rewardRate =
+            s_state.reward /
+            ((s_state.deadline - block.timestamp));
         if (s_fundersAmount[msg.sender] == 0) {
             s_funders.push(msg.sender);
         }
@@ -359,31 +370,18 @@ contract ProjectContract is IERC721Receiver {
 
     function withdrawFunds() public onlyOwner {
         //if the project is ended or expired, the owner can withdraw the funds left
-        require(!s_success && block.timestamp > s_deadline, projectNotEnded());
-        (bool callSuccess, ) = payable(msg.sender).call{value: s_reward}("");
+        require(
+            !s_state.success && block.timestamp > s_state.deadline,
+            projectNotEnded()
+        );
+        (bool callSuccess, ) = payable(msg.sender).call{value: s_state.reward}(
+            ""
+        );
         require(callSuccess, withdrawalFailed());
     }
 
-    function getProjectInfo()
-        public
-        view
-        returns (
-            string memory name,
-            string memory description,
-            uint256 initialReward,
-            uint256 deadline,
-            address owner,
-            bool success
-        )
-    {
-        return (
-            s_name,
-            s_description,
-            s_reward,
-            s_deadline,
-            s_owner,
-            s_success
-        );
+    function getProjectInfo() public view returns (ProjectState memory) {
+        return s_state;
     }
 
     function getAllApplicants() public view returns (address[] memory) {
@@ -405,7 +403,15 @@ contract ProjectContract is IERC721Receiver {
     }
 
     function getRewardRate() public view returns (uint256) {
-        return s_rewardRate;
+        return s_state.rewardRate;
+    }
+
+    function getRewardPerToken() public view returns (uint256) {
+        return s_rewardPerToken;
+    }
+
+    function getUserReputation(address staker) public view returns (uint256) {
+        return s_userReputation[staker];
     }
 
     function getFundersAmount(address funder) public view returns (uint256) {

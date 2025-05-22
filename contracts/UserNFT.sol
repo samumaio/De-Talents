@@ -97,11 +97,7 @@ contract UserNFT is ERC721 {
 
     function withdrawLiquidity(uint256 tokenId, uint256 amount) external {
         //only an approved ProjectContract or the owner of the NFT can withdraw liquidity
-        require(
-            getApproved(tokenId) == msg.sender ||
-                ownerOf(tokenId) == msg.sender,
-            notAllowed()
-        );
+        require(ownerOf(tokenId) == msg.sender, notAllowed());
         require(amount <= reputation[tokenId], withdrawFailed());
         (bool callSuccess, ) = payable(msg.sender).call{value: amount}("");
         require(callSuccess, withdrawFailed());
