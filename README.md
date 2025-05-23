@@ -102,9 +102,17 @@ Questo Smart Contract permette di creare in maniera trasparente nuovi progetti o
 
 Questo smart contract permette di regolare lo sviluppo di un progetto open-source. 
 
+Smart Contract in cui è implementato l'algoritmo di staking e la relativa logica di ricompensa. I contribuenti del progetto depositano una quantità di denaro sul contratto UserNFT, dopodiché mettono in gioco il proprio NFT nello smart contract di progetto in modo da assicurare il proprio contributo allo sviluppo del codice.
+
+La quantità di liquidità depositata nello contratto userNFT è prelevabile esclusivamente dal proprietario del relativo NFT associato. In caso di rimborso a causa di un mancata azione svolta dal contribuente, il committente può prelevare una parte di liquidità dal userNFT firmando una transazione tramite l'indirizzo del contratto da lui posseduto.
+
+Al fine di minimizzare il costo del gas di ciascuna operazione, il contratto implementa una logica di esecuzione priva di iterazioni calcolando accumulando dinamicamente le ricompense in qualsiasi istante il contribuente si unisca al progetto.
+
 ## Struttura del contratto 
 
 - uint256 private s_rewardPerToken -> Rappresenta la ricompensa ;
+- 
+
 
   
 **Indirizzo dello smart contract:**  0xE7dF2b925764a2a7474F9a9F35082FB10686D886
