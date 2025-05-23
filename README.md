@@ -1,3 +1,29 @@
+# DeTalents - Introduzione
+
+Prima di illustrare il funzionamento di DeTalents, è necessario introdurre alcuni aspetti tecnici: 
+
+##  Blockchain
+Una blockchain è come un grande registro digitale pubblico e condiviso che conserva informazioni in modo sicuro, immutabile e trasparente. Ogni operazione o modifica viene registrata in blocchi, collegati tra loro in ordine cronologico. Una volta scritto qualcosa nella blockchain, non può essere modificato.
+
+## Smart Contract
+Gli smart contract (contratti intelligenti) sono programmi che vengono eseguiti automaticamente sulla blockchain garantendo l'esecuzione dinamica di transazioni in base a determinate condizione. Non richiedono intermediari e garantiscono che le regole siano rispettate. Ad esempio, un certificato NFT viene rilasciato solo se l'istituzione è verificata.
+
+## DAO (Organizzazione Autonoma Decentralizzata)
+Una DAO è un’organizzazione che funziona in modo democratico attraverso regole codificate in smart contract. Le decisioni (come approvare nuove istituzioni) vengono prese con votazioni effettuate direttamente dagli utenti, in questo caso da altre istituzioni verificate.
+
+## Wallet (Portafoglio digitale)
+Un wallet è un'applicazione o dispositivo che permette a un utente di interagire con la blockchain. Serve per conservare in sicurezza criptovalute, NFT e per firmare digitalmente le operazioni, come votazioni o la creazione di certificati. Nel nostro caso, Metamask consente di gestire la chaive privata di un account e firmare delle transazioni sulla blockchain.
+
+## Transazione
+Una transazione è qualsiasi azione registrata sulla blockchain, come l’invio di un token, la creazione di un certificato o un voto in una DAO. Ogni transazione è pubblica, tracciabile e non modificabile.
+
+## NFT (Token Non Fungibile)
+Un NFT è un certificato digitale unico e verificabile, registrato sulla blockchain. In DeTalents, gli NFT rappresentano certificati di istruzione, competenze e reputazione, garantendo l’autenticità del documento e la proprietà da parte del titolare. Rispetto a piattaforme proprietarie o non verificabili, una qualsiasi azienda può verificare la ownership di un certificato di formazione attraverso la blockchain.
+
+## Token
+I token sono asset digitali usati all’interno di una piattaforma blockchain. Possono rappresentare valore (come premi), accesso a funzionalità o potere di voto. In DeTalents, i token vengono usati per premiare la partecipazione attiva e il completamento di progetti open source.
+
+
 # UserNFT - Smart Contract ERC721
 
 Questo smart contract permette agli utenti di creare un NFT personale destinato a un indirizzo specifico ed è basato sullo standard ERC721. Ciò significa che gli NFT generati sono non fungibili, ovvero unici e non interscambiabili. Questo standard è stato scelto perché gli NFT rappresentano certificati digitali associati a una persona.
